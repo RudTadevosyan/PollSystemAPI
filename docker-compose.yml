@@ -1,0 +1,177 @@
+services:
+  pollmanagementapi:
+    build:
+      context: .
+      dockerfile: PollManagementAPI/Dockerfile
+    container_name: pollmanagementapi
+    ports:
+      - "44307:8080"
+    environment:
+      - POLL_MANAGEMENT__ConnectionStrings__VotePollConnection=Host=postgres-poll;Port=5432;Database=VotePollDb;Username=postgres;Password=2005
+      - POLL_MANAGEMENT__Jwt__Key=YourSuperSecretKeyHere123456789000_JWT
+      - POLL_MANAGEMENT__Jwt__Issuer=AuthService
+      - POLL_MANAGEMENT__Jwt__Audience=PollManagement
+      - POLL_MANAGEMENT__RabbitMQ__Host=rabbitmq://rabbitmq
+      - POLL_MANAGEMENT__RabbitMQ__Username=guest
+      - POLL_MANAGEMENT__RabbitMQ__Password=guest
+    depends_on:
+      postgres-poll:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - backend
+
+  resultaggregationapi:
+    build:
+      context: .
+      dockerfile: ResultAggregationAPI/Dockerfile
+    container_name: resultaggregationapi
+    ports:
+      - "44333:8080"
+    environment:
+      - RESULT_AGGREGATION__MongoDb__ConnectionString=mongodb://mongodb:27017
+      - RESULT_AGGREGATION__MongoDb__DatabaseName=ResultAggregationDb
+      - RESULT_AGGREGATION__Redis__ConnectionString=redis:6379
+      - RESULT_AGGREGATION__RabbitMQ__Host=rabbitmq://rabbitmq
+      - RESULT_AGGREGATION__RabbitMQ__Username=guest
+      - RESULT_AGGREGATION__RabbitMQ__Password=guest
+      - RESULT_AGGREGATION__PollManagement__BaseUrl=http://pollmanagementapi:8080/
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      pollmanagementapi:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - backend
+
+  authserviceapi:
+    build:
+      context: .
+      dockerfile: AuthServiceAPI/Dockerfile
+    container_name: authserviceapi
+    ports:
+      - "44317:8080"
+    environment:
+      - AUTH_SERVICE__ConnectionStrings__AuthServiceDbContext=Host=postgres-auth;Port=5432;Database=AuthServiceDb;Username=postgres;Password=2005
+      - AUTH_SERVICE__Jwt__Key=YourSuperSecretKeyHere123456789000_JWT
+      - AUTH_SERVICE__Jwt__Issuer=AuthService
+      - AUTH_SERVICE__Jwt__Audience=PollManagement
+      - AUTH_SERVICE__RabbitMQ__Host=rabbitmq://rabbitmq
+      - AUTH_SERVICE__RabbitMQ__Username=guest
+      - AUTH_SERVICE__RabbitMQ__Password=guest
+    depends_on:
+      postgres-auth:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - backend
+
+  postgres-poll:
+    image: postgres:15
+    container_name: postgres-poll
+    environment:
+      POSTGRES_DB: VotePollDb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 2005
+    volumes:
+      - postgres-poll-data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - backend
+
+  postgres-auth:
+    image: postgres:15
+    container_name: postgres-auth
+    environment:
+      POSTGRES_DB: AuthServiceDb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 2005
+    volumes:
+      - postgres-auth-data:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - backend
+
+  mongodb:
+    image: mongo:7
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - backend
+
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - backend
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  postgres-poll-data:
+  postgres-auth-data:
+  mongo-data:
+  redis-data:
