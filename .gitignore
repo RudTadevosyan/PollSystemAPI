@@ -30,7 +30,7 @@ packages/
 
 # User secrets
 secrets.json
-
-# Optional: Ignore your actual appsettings with real secrets
+appsettings.json
 appsettings.*.json
+.env
 
