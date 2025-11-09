@@ -28,8 +28,8 @@ public class VoteService : IVoteService
 
     public async Task<IEnumerable<VoteDto>> GetMyVotesAsync(int userId, int pageNumber = 1, int pageSize = 10)
     {
-        if (pageNumber <= 0) pageNumber = 1;
-        if (pageSize <= 0) pageSize = 10;
+        if (pageNumber <= 0 || pageNumber >= 100) pageNumber = 1;
+        if (pageSize <= 0 || pageSize >= 100) pageSize = 10;
         
         var votes = await _voteRepository.GetMyVotesAsync(userId, pageNumber, pageSize);
         return _mapper.Map<IEnumerable<VoteDto>>(votes);

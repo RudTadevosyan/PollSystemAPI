@@ -20,8 +20,8 @@ public class PollService : IPollService
     }
     public async Task<IEnumerable<PollDto>> GetAllPolls(PollFilterDto filter, bool includeVotes = false, int pageNumber = 1, int pageSize = 10)
     {
-        if (pageNumber <= 0) pageNumber = 1;
-        if (pageSize <= 0) pageSize = 10;
+        if (pageNumber <= 0 || pageNumber >= 100) pageNumber = 1;
+        if (pageSize <= 0 || pageSize >= 100) pageSize = 10;
         
         var spec = new PollByFilterSpec(filter);
         var items = await _pollRepository.GetAllAsync(spec, includeVotes ,pageNumber, pageSize);
@@ -38,8 +38,8 @@ public class PollService : IPollService
 
     public async Task<IEnumerable<PollDto>> GetMyPollsAsync(int userId, bool includeVotes = false, int pageNumber = 1, int pageSize = 10)
     {
-        if (pageNumber <= 0) pageNumber = 1;
-        if (pageSize <= 0) pageSize = 10;
+        if (pageNumber <= 0 || pageNumber >= 100) pageNumber = 1;
+        if (pageSize <= 0 || pageSize >= 100) pageSize = 10;
         
         var items = await _pollRepository.GetMyPollsAsync(userId, includeVotes, pageNumber, pageSize);
         return _mapper.Map<IEnumerable<PollDto>>(items);
