@@ -6,8 +6,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PollManagement.API.Extensions;
 using PollManagement.API.Middlewares;
+using PollManagement.Application.Background.Jobs;
 using PollManagement.Application.Consumers;
-using PollManagement.Infrastructure.Background.Jobs;
 using PollManagement.Infrastructure.DataBases;
 using Quartz;
 

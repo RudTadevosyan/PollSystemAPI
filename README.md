@@ -1,6 +1,6 @@
 # Poll System Backend – Documentation
 
-A **RESTful WebAPI backend** for managing polls, voting, and result aggregation, built with **.NET 8** and following **Domain-Driven Design (DDD)** principles. The system is organized into modular microservices, each responsible for a specific domain, and communicates through **event-driven patterns** using **RabbitMQ** and **MassTransit**.
+A **RESTful WebAPI backend** for managing polls, voting, and result aggregation, built with **.NET 8** and following **Clean Architecture** principles. The system is organized into modular microservices, each responsible for a specific domain, and communicates through **event-driven patterns** using **RabbitMQ** and **MassTransit**.
 
 It combines **caching, relational (PostgreSQL), and NoSQL (MongoDB) data stores** to ensure efficient, reliable, and consistent data handling. With synchronous validation, atomic transactions, and clear separation of concerns, it demonstrates a practical approach to structuring complex business logic, asynchronous workflows, and inter-service communication in a maintainable, scalable way.
 
@@ -93,6 +93,11 @@ Services communicate asynchronously through **RabbitMQ** and **MassTransit**, wh
 - **HttpClientFactory** – synchronous validation across services
 - **Docker** – containerization
 
+
+## Urls
+- **PollManagmentAPI - http://localhost:44317/swagger
+- **AuthServiceAPI - http://localhost:44307/swagger
+- **ResultAggregationAPI - http://localhost:44333/swagger
 ---
 
 ## Getting Started

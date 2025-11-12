@@ -1,8 +1,8 @@
 ﻿using PollManagement.Application.Helpers.Mappings;
+using PollManagement.Application.Messaging.Publishers;
 using PollManagement.Application.Services;
 using PollManagement.Domain.Interfaces.RepositoryInterfaces;
 using PollManagement.Domain.Interfaces.ServiceInterfaces;
-using PollManagement.Infrastructure.Messaging.Publishers;
 using PollManagement.Infrastructure.Repositories;
 
 namespace PollManagement.API.Extensions;
